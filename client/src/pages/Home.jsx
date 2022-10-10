@@ -39,7 +39,7 @@ const Home = () => {
     return (
         <div class="grid h-screen place-items-center">
             <form class="px-8 pt-6 pb-8 mb-4">
-                <h1 className="text-7xl font-sans font-normal leading-normal mt-0 mb-2 text-white">
+                <h1 className="text-7xl font-sans font-bold leading-normal mt-0 mb-2 text-gray-400">
                     Worduel
                 </h1>
                 <div class="mb-4">
