@@ -2,14 +2,14 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-import useGame from "./useGame";
+import useGame from "../includes/useGame";
 
 const Game = (props) => {
     const { roomId } = useParams();
     const [cookies] = useCookies(['worduel']);
     const { guesses, sendGuess } = useGame(roomId, cookies["user-id"]);
     const [newGuess, setNewGuess] = React.useState("");
-    const words = require("./words.json");
+    const words = require("../includes/words.json");
 
     const handleNewGuessChange = (event) => {
         setNewGuess(event.target.value);

@@ -18,5 +18,5 @@
 - [x] Generate 4-character gameId
 - [x] Add word list
 - [ ] Interface for game room
-- [ ] Validate guesses against word list
+- [x] Validate guesses against word list
 - [ ] Limit guessing to current player

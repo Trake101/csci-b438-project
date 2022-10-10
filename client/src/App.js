@@ -2,8 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import "./index.css";
-import Home from "./Home";
-import Game from "./Game";
+import Home from "./pages/Home";
+import Game from "./pages/Game";
 
 function App() {
   return (
