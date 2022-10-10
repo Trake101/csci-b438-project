@@ -9,6 +9,10 @@
 - [x] Track current player's turn
 - [x] Connect to SQLite
 - [x] Track games in SQLite
+- [ ] Track score per guess
+- [x] Track score per round
+- [ ] Track score per game
+- [ ] Track guessed letters
 
 ### Client
 
@@ -18,5 +22,8 @@
 - [x] Generate 4-character gameId
 - [x] Add word list
 - [ ] Interface for game room
+      -- [ ] Guesses component
+      -- [ ] Keyboard component
+      -- [ ] Scoreboard component
 - [x] Validate guesses against word list
 - [ ] Limit guessing to current player
