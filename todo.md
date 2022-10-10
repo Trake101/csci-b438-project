@@ -11,10 +11,11 @@
   - [x] Track current round
   - [x] Track current player's turn
   - [x] Track games in SQLite
-  - [ ] Track score per guess
+  - [x] Track score per guess
   - [x] Track score per round
   - [ ] Track score per game
-  - [ ] Track guessed letters
+  - [x] Track guessed letters
+- [ ] Clean up return data
 
 ### Client
 

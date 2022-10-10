@@ -47,7 +47,7 @@ function newGamePromise(gameId, userId) {
       for (let i = 0; i < word.length; i++) {
         if (uniq.includes(word[i]) === false) {
           uniq += word[i];
-          res.push({ letter: word[i], points: 5 });
+          res.push({ letter: word[i], points: 10 });
         }
       }
 
@@ -57,21 +57,21 @@ function newGamePromise(gameId, userId) {
     const round1Data = {
       guesses: [],
       guessPoints: findUnique(word1),
-      matchPoints: [10, 10, 10, 10, 10],
+      matchPoints: [20, 20, 20, 20, 20],
       player1_points: 0,
       player2_points: 0,
     };
     const round2Data = {
       guesses: [],
       guessPoints: findUnique(word2),
-      matchPoints: [10, 10, 10, 10, 10],
+      matchPoints: [20, 20, 20, 20, 20],
       player1_points: 0,
       player2_points: 0,
     };
     const round3Data = {
       guesses: [],
       guessPoints: findUnique(word3),
-      matchPoints: [10, 10, 10, 10, 10],
+      matchPoints: [20, 20, 20, 20, 20],
       player1_points: 0,
       player2_points: 0,
     };
@@ -114,6 +114,10 @@ function joinGamePromise(gameId, userId) {
 function updateRoundDataPromise(gameId, round, player, word, guess, roundData) {
   return new Promise((resolve) => {
     let points = 0;
+    let matchedLetters = [];
+    let guessedLetters = [];
+    let incorrectLetters = [];
+    let indicators = [];
     let nextRound = round;
     let nextPlayer = player === "player1" ? "player2" : "player1";
     if (word === guess) {
@@ -121,27 +125,64 @@ function updateRoundDataPromise(gameId, round, player, word, guess, roundData) {
       if (nextRound < 3) {
         nextRound += 1;
       }
-      nextPlayer = nextPlayer === "player1" ? "player2" : "player1";
+      nextPlayer = player;
     }
 
     const wordChars = word.split("");
     const guessChars = guess.split("");
-    roundData.guesses.push(guess);
 
     for (i = 0; i < guessChars.length; i++) {
+      let found = false;
       if (guessChars[i] === wordChars[i]) {
         points += roundData.matchPoints[i];
         roundData.matchPoints[i] = 0;
+
+        if (!matchedLetters.includes(guessChars[i])) {
+          matchedLetters.push(guessChars[i]);
+        }
+
+        indicators.push("matched");
+        found = true;
       }
 
       for (j = 0; j < roundData.guessPoints.length; j++) {
         if (roundData.guessPoints[j].letter === guessChars[i]) {
           points += roundData.guessPoints[j].points;
           roundData.guessPoints[j].points = 0;
+
+          if (
+            !matchedLetters.includes(guessChars[i]) &&
+            !guessedLetters.includes(guessChars[i])
+          ) {
+            guessedLetters.push(guessChars[i]);
+          }
+
+          if (!found) {
+            indicators.push("guessed");
+            found = true;
+          }
         }
+      }
+
+      if (
+        !matchedLetters.includes(guessChars[i]) &&
+        !guessedLetters.includes(guessChars[i]) &&
+        !incorrectLetters.includes(guessChars[i])
+      ) {
+        incorrectLetters.push(guessChars[i]);
+      }
+
+      if (!found) {
+        indicators.push("incorrect");
       }
     }
 
+    roundData.guesses[roundData.guesses.length] = {
+      guess: guess,
+      player: player,
+      points: points,
+      indicators: indicators,
+    };
     roundData[`${player}_points`] += points;
 
     db.run(
@@ -150,10 +191,7 @@ function updateRoundDataPromise(gameId, round, player, word, guess, roundData) {
       currentRound = ${nextRound},
       currentTurn = '${nextPlayer}'
       WHERE gameId = '${gameId}'`,
-      (err) => {
-        if (err) {
-          console.log(err);
-        }
+      () => {
         resolve();
       }
     );
@@ -195,8 +233,6 @@ io.on("connection", async (socket) => {
       );
 
       gameData = await gameDataPromise(gameId);
-
-      console.log(gameData);
 
       console.info(
         `User Guessed: { gameId: '${gameId}', userId: '${userId}', guess: '${guess}' }`
