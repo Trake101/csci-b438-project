@@ -28,5 +28,5 @@
   - [ ] Guesses component
   - [ ] Keyboard component
   - [ ] Scoreboard component
-  - [ ] Limit guessing to current player
+  - [x] Limit guessing to current player
   - [x] Validate guesses against word list
