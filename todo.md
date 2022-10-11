@@ -15,7 +15,7 @@
   - [x] Track score per round
   - [x] Track score per game
   - [x] Track guessed letters
-- [ ] Clean up return data
+- [x] Clean up return data
 
 ### Client
 

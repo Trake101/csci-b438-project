@@ -129,14 +129,6 @@ function updateRoundDataPromise(gameData, guess) {
     let nextPlayer =
       gameData.currentPlayer === "player1" ? "player2" : "player1";
 
-    if (word === guess) {
-      points += 100;
-      if (nextRound < 3) {
-        nextRound += 1;
-      }
-      nextPlayer = gameData.currentPlayer;
-    }
-
     const wordChars = word.split("");
     const guessChars = guess.split("");
 
@@ -192,6 +184,26 @@ function updateRoundDataPromise(gameData, guess) {
       points: points,
       indicators: indicators,
     };
+
+    if (word === guess) {
+      points += 100;
+      if (nextRound < 4) {
+        nextRound += 1;
+      }
+      if (nextRound === 4) {
+        nextPlayer = "game over";
+      } else {
+        nextPlayer = gameData.currentPlayer;
+      }
+    } else if (roundData.guesses.length === 6) {
+      if (nextRound < 4) {
+        nextRound += 1;
+      }
+      if (nextRound === 4) {
+        nextPlayer = "game over";
+      }
+    }
+
     roundData[`${gameData.currentPlayer}_points`] += points;
     roundData.matchedLetters = matchedLetters;
     roundData.guessedLetters = guessedLetters;
@@ -212,6 +224,47 @@ function updateRoundDataPromise(gameData, guess) {
   });
 }
 
+function returnDataPromise(gameData) {
+  return new Promise((resolve) => {
+    const round1 = JSON.parse(gameData.round1);
+    const round2 = JSON.parse(gameData.round2);
+    const round3 = JSON.parse(gameData.round3);
+
+    const returnData = {
+      currentRound: gameData.currentRound,
+      currentPlayer: gameData.currentPlayer,
+      player1Score: gameData.player1Score,
+      player2Score: gameData.player2Score,
+      round1: {
+        guesses: round1.guesses,
+        matchedLetters: round1.matchedLetters,
+        guessedLetters: round1.guessedLetters,
+        incorrectLetters: round1.incorrectLetters,
+        player1_points: round1.player1_points,
+        player2_points: round1.player2_points,
+      },
+      round2: {
+        guesses: round2.guesses,
+        matchedLetters: round2.matchedLetters,
+        guessedLetters: round2.guessedLetters,
+        incorrectLetters: round2.incorrectLetters,
+        player1_points: round2.player1_points,
+        player2_points: round2.player2_points,
+      },
+      round3: {
+        guesses: round3.guesses,
+        matchedLetters: round3.matchedLetters,
+        guessedLetters: round3.guessedLetters,
+        incorrectLetters: round3.incorrectLetters,
+        player1_points: round3.player1_points,
+        player2_points: round3.player2_points,
+      },
+    };
+
+    resolve(returnData);
+  });
+}
+
 io.on("connection", async (socket) => {
   const { gameId, userId } = socket.handshake.query;
 
@@ -229,7 +282,8 @@ io.on("connection", async (socket) => {
 
   if (userId === gameData.player1 || userId === gameData.player2) {
     socket.join(gameId);
-    io.in(gameId).emit(GAME_DATA, gameData);
+    let returnData = await returnDataPromise(gameData);
+    io.in(gameId).emit(GAME_DATA, returnData);
 
     socket.on(NEW_GUESS_EVENT, async (data) => {
       const { guess, userId, gameId } = data;
@@ -238,42 +292,7 @@ io.on("connection", async (socket) => {
       await updateRoundDataPromise(gameData, guess);
 
       gameData = await gameDataPromise(gameId);
-      const round1 = JSON.parse(gameData.round1);
-      const round2 = JSON.parse(gameData.round2);
-      const round3 = JSON.parse(gameData.round3);
-
-      const returnData = {
-        currentRound: gameData.currentRound,
-        currentPlayer: gameData.currentPlayer,
-        player1Score: gameData.player1Score,
-        player2Score: gameData.player2Score,
-        round1: {
-          guesses: round1.guesses,
-          matchedLetters: round1.matchedLetters,
-          guessedLetters: round1.guessedLetters,
-          incorrectLetters: round1.incorrectLetters,
-          player1_points: round1.player1_points,
-          player2_points: round1.player2_points,
-        },
-        round2: {
-          guesses: round2.guesses,
-          matchedLetters: round2.matchedLetters,
-          guessedLetters: round2.guessedLetters,
-          incorrectLetters: round2.incorrectLetters,
-          player1_points: round2.player1_points,
-          player2_points: round2.player2_points,
-        },
-        round3: {
-          guesses: round3.guesses,
-          matchedLetters: round3.matchedLetters,
-          guessedLetters: round3.guessedLetters,
-          incorrectLetters: round3.incorrectLetters,
-          player1_points: round3.player1_points,
-          player2_points: round3.player2_points,
-        },
-      };
-
-      console.log(returnData);
+      returnData = await returnDataPromise(gameData);
 
       console.info(
         `User Guessed: { gameId: '${gameId}', userId: '${userId}', guess: '${guess}' }`
