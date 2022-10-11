@@ -13,7 +13,7 @@
   - [x] Track games in SQLite
   - [x] Track score per guess
   - [x] Track score per round
-  - [ ] Track score per game
+  - [x] Track score per game
   - [x] Track guessed letters
 - [ ] Clean up return data
 

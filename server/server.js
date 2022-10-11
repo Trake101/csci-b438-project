@@ -16,12 +16,14 @@ db.run(`CREATE TABLE IF NOT EXISTS games(
   gameId text,
   words text,
   player1 text,
+  player1Score integer,
   player2 text,
+  player2Score integer,
   round1 text,
   round2 text,
   round3 text,
   currentRound integer,
-  currentTurn text
+  currentPlayer text
 )`);
 
 function gameDataPromise(gameId) {
@@ -81,7 +83,9 @@ function newGamePromise(gameId, userId) {
         '${gameId}',
         '${gameWords}',
         '${userId}',
+        0,
         '',
+        0,
         '${JSON.stringify(round1Data)}',
         '${JSON.stringify(round2Data)}',
         '${JSON.stringify(round3Data)}',
@@ -111,21 +115,26 @@ function joinGamePromise(gameId, userId) {
   });
 }
 
-function updateRoundDataPromise(gameId, round, player, word, guess, roundData) {
+function updateRoundDataPromise(gameData, guess) {
   return new Promise((resolve) => {
+    const word = JSON.parse(gameData.words)[gameData.currentRound - 1];
+    let roundData = JSON.parse(gameData[`round${gameData.currentRound}`]);
+
     let points = 0;
     let matchedLetters = [];
     let guessedLetters = [];
     let incorrectLetters = [];
     let indicators = [];
-    let nextRound = round;
-    let nextPlayer = player === "player1" ? "player2" : "player1";
+    let nextRound = gameData.currentRound;
+    let nextPlayer =
+      gameData.currentPlayer === "player1" ? "player2" : "player1";
+
     if (word === guess) {
       points += 100;
       if (nextRound < 3) {
         nextRound += 1;
       }
-      nextPlayer = player;
+      nextPlayer = gameData.currentPlayer;
     }
 
     const wordChars = word.split("");
@@ -179,18 +188,23 @@ function updateRoundDataPromise(gameId, round, player, word, guess, roundData) {
 
     roundData.guesses[roundData.guesses.length] = {
       guess: guess,
-      player: player,
+      player: gameData.currentPlayer,
       points: points,
       indicators: indicators,
     };
-    roundData[`${player}_points`] += points;
+    roundData[`${gameData.currentPlayer}_points`] += points;
+    roundData.matchedLetters = matchedLetters;
+    roundData.guessedLetters = guessedLetters;
+    roundData.incorrectLetters = incorrectLetters;
+    const gamePoints = gameData[`${gameData.currentPlayer}Score`] + points;
 
     db.run(
       `UPDATE games
-      SET round${round} = '${JSON.stringify(roundData)}',
+      SET round${gameData.currentRound} = '${JSON.stringify(roundData)}',
       currentRound = ${nextRound},
-      currentTurn = '${nextPlayer}'
-      WHERE gameId = '${gameId}'`,
+      currentPlayer = '${nextPlayer}',
+      ${gameData.currentPlayer}Score = ${gamePoints}
+      WHERE gameId = '${gameData.gameId}'`,
       () => {
         resolve();
       }
@@ -220,19 +234,46 @@ io.on("connection", async (socket) => {
     socket.on(NEW_GUESS_EVENT, async (data) => {
       const { guess, userId, gameId } = data;
       gameData = await gameDataPromise(gameId);
-      gameWords = JSON.parse(gameData.words);
-      roundData = JSON.parse(gameData[`round${gameData.currentRound}`]);
 
-      await updateRoundDataPromise(
-        gameId,
-        gameData.currentRound,
-        gameData.currentTurn,
-        gameWords[gameData.currentRound - 1],
-        guess,
-        roundData
-      );
+      await updateRoundDataPromise(gameData, guess);
 
       gameData = await gameDataPromise(gameId);
+      const round1 = JSON.parse(gameData.round1);
+      const round2 = JSON.parse(gameData.round2);
+      const round3 = JSON.parse(gameData.round3);
+
+      const returnData = {
+        currentRound: gameData.currentRound,
+        currentPlayer: gameData.currentPlayer,
+        player1Score: gameData.player1Score,
+        player2Score: gameData.player2Score,
+        round1: {
+          guesses: round1.guesses,
+          matchedLetters: round1.matchedLetters,
+          guessedLetters: round1.guessedLetters,
+          incorrectLetters: round1.incorrectLetters,
+          player1_points: round1.player1_points,
+          player2_points: round1.player2_points,
+        },
+        round2: {
+          guesses: round2.guesses,
+          matchedLetters: round2.matchedLetters,
+          guessedLetters: round2.guessedLetters,
+          incorrectLetters: round2.incorrectLetters,
+          player1_points: round2.player1_points,
+          player2_points: round2.player2_points,
+        },
+        round3: {
+          guesses: round3.guesses,
+          matchedLetters: round3.matchedLetters,
+          guessedLetters: round3.guessedLetters,
+          incorrectLetters: round3.incorrectLetters,
+          player1_points: round3.player1_points,
+          player2_points: round3.player2_points,
+        },
+      };
+
+      console.log(returnData);
 
       console.info(
         `User Guessed: { gameId: '${gameId}', userId: '${userId}', guess: '${guess}' }`
