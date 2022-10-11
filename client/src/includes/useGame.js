@@ -6,7 +6,7 @@ const NEW_GUESS_EVENT = "newGuess";
 const SOCKET_SERVER_URL = "http://localhost:4444";
 
 const useGame = (gameId, userId) => {
-  const [guesses, setGuesses] = useState([]);
+  const [gameData, setGameData] = useState({});
   const socketRef = useRef();
 
   useEffect(() => {
@@ -14,15 +14,12 @@ const useGame = (gameId, userId) => {
       query: { gameId, userId },
     });
 
-    socketRef.current.on(GAME_DATA, (gameData) => {
-      console.log(gameData);
+    socketRef.current.on(GAME_DATA, (data) => {
+      setGameData(data);
     });
 
-    socketRef.current.on(NEW_GUESS_EVENT, (guess) => {
-      const incomingGuess = {
-        ...guess,
-      };
-      setGuesses((guesses) => [...guesses, incomingGuess]);
+    socketRef.current.on(NEW_GUESS_EVENT, (data) => {
+      setGameData(data);
     });
 
     return () => {
@@ -38,7 +35,11 @@ const useGame = (gameId, userId) => {
     });
   };
 
-  return { guesses, sendGuess };
+  const getGameData = () => {
+    socketRef.current.emit(GAME_DATA, {});
+  };
+
+  return { sendGuess, gameData, getGameData };
 };
 
 export default useGame;

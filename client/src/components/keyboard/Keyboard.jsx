@@ -1,47 +1,22 @@
 import { useEffect } from 'react'
-
-import { getStatuses } from '../../lib/statuses'
-import { localeAwareUpperCase } from '../../lib/words'
 import { Key } from './Key'
 
-export const Keyboard = ({
-  onChar,
-  onDelete,
-  onEnter,
-  solution,
-  guesses,
-  isRevealing,
-}) => {
-  const charStatuses = getStatuses(solution, guesses)
+export const Keyboard = ({guessedLetters, matchedLetters, incorrectLetters}) => {
+  const checkStatus = (key) => {
+    if (matchedLetters.includes(key.toString().toLowerCase())) {
+      return 'matched';
+    }
 
-  const onClick = (value) => {
-    if (value === 'ENTER') {
-      onEnter()
-    } else if (value === 'DELETE') {
-      onDelete()
-    } else {
-      onChar(value)
+    if (guessedLetters.includes(key.toString().toLowerCase())) {
+      return 'guessed';
     }
-  }
 
-  useEffect(() => {
-    const listener = (event) => {
-      if (event.code === 'Enter') {
-        onEnter()
-      } else if (event.code === 'Backspace') {
-        onDelete()
-      } else {
-        const key = localeAwareUpperCase(event.key)
-        if (key.length === 1 && key >= 'A' && key <= 'Z') {
-          onChar(key)
-        }
-      }
+    if (incorrectLetters.includes(key.toString().toLowerCase())) {
+      return 'incorrect';
     }
-    window.addEventListener('keyup', listener)
-    return () => {
-      window.removeEventListener('keyup', listener)
-    }
-  }, [onEnter, onDelete, onChar])
+
+    return false;
+  };
 
   return (
     <div>
@@ -50,9 +25,8 @@ export const Keyboard = ({
           <Key
             value={key}
             key={key}
-            onClick={onClick}
-            status={charStatuses[key]}
-            isRevealing={isRevealing}
+            status={checkStatus(key)}
+            onClick={() => {console.log();}}
           />
         ))}
       </div>
@@ -61,26 +35,24 @@ export const Keyboard = ({
           <Key
             value={key}
             key={key}
-            onClick={onClick}
-            status={charStatuses[key]}
-            isRevealing={isRevealing}
+            status={checkStatus(key)}
+            onClick={() => {console.log();}}
           />
         ))}
       </div>
       <div className="flex justify-center">
-        <Key width={65.4} value="ENTER" onClick={onClick}>
+        <Key width={65.4} value="ENTER" onClick={() => {console.log();}}>
           ENTER
         </Key>
         {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map((key) => (
           <Key
             value={key}
             key={key}
-            onClick={onClick}
-            status={charStatuses[key]}
-            isRevealing={isRevealing}
+            status={checkStatus(key)}
+            onClick={() => {console.log();}}
           />
         ))}
-        <Key width={65.4} value="DELETE" onClick={onClick}>
+        <Key width={65.4} value="DELETE" onClick={() => {console.log();}}>
           DELETE
         </Key>
       </div>
