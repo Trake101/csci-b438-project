@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 import useGame from "../includes/useGame";
+import { Guesses } from "../components/guesses/Guesses";
 import { Keyboard } from "../components/keyboard/Keyboard";
 
-const Game = (props) => {
+const Game = () => {
     const { roomId } = useParams();
     const [cookies] = useCookies(['worduel']);
     const { sendGuess, gameData, getGameData } = useGame(roomId, cookies["user-id"]);
@@ -16,14 +17,10 @@ const Game = (props) => {
         getGameData();
     }
 
-    const handleNewGuessChange = (event) => {
-        setNewGuess(event.target.value);
-    };
-
     const handleSendGuess = () => {
-        if ( words.includes(newGuess) ) {
-            sendGuess(newGuess);
-            console.log(gameData);
+        const guess = newGuess.toLowerCase();
+        if ( words.includes(guess) ) {
+            sendGuess(guess);
             setNewGuess("");
         } else {
             console.log("invalid word");
@@ -42,15 +39,21 @@ const Game = (props) => {
                     ))}
                 </ol>
             </div>
+            {gameData[`round${gameData.currentRound}`] &&
+                <>
+                <Guesses guesses={gameData[`round${gameData.currentRound}`].guesses} currentGuess={newGuess} currentRowClassName={''} />
+                </>
+            }
             {gameData.currentPlayer === cookies["user-id"] &&
                 <>
-                <textarea value={newGuess} onChange={handleNewGuessChange} placeHolder="Write guess" className="guess-input" />
-                <button onClick={handleSendGuess} className="send-guess">Send</button>
-                <Keyboard 
-                    guessedLetters={gameData[`round${gameData.currentRound}`].guessedLetters} 
-                    matchedLetters={gameData[`round${gameData.currentRound}`].matchedLetters} 
-                    incorrectLetters={gameData[`round${gameData.currentRound}`].incorrectLetters} 
-                />
+                    <Keyboard 
+                        guessedLetters={gameData[`round${gameData.currentRound}`].guessedLetters} 
+                        matchedLetters={gameData[`round${gameData.currentRound}`].matchedLetters} 
+                        incorrectLetters={gameData[`round${gameData.currentRound}`].incorrectLetters} 
+                        newGuess={newGuess}
+                        setNewGuess={setNewGuess}
+                        sendGuess={handleSendGuess}
+                    />
                 </>
             }
         </div>

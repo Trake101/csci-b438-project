@@ -25,8 +25,8 @@
 - [ ] Interface for game room
   - [x] Connect to server
   - [x] Add word list
-  - [ ] Guesses component
-  - [ ] Keyboard component
+  - [x] Guesses component
+  - [x] Keyboard component
   - [ ] Scoreboard component
   - [x] Limit guessing to current player
   - [x] Validate guesses against word list
