@@ -3,7 +3,7 @@ import socketIOClient from "socket.io-client";
 
 const GAME_DATA = "gameData";
 const NEW_GUESS_EVENT = "newGuess";
-const SOCKET_SERVER_URL = "http://localhost:4444";
+const SOCKET_SERVER_URL = "http://161.35.52.135:4444";
 
 const useGame = (gameId, userId) => {
   const [gameData, setGameData] = useState({});

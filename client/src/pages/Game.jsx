@@ -32,13 +32,6 @@ const Game = () => {
             <h1 className="game-code">Game: {roomId}</h1>
             <h3>Round: {gameData.currentRound}</h3>
             <button onClick={handleLoadGame} className="send-guess">Connect</button>
-            <div className="game-container">
-                <ol className="guesses">
-                    {gameData[`round${gameData.currentRound}`] && gameData[`round${gameData.currentRound}`].guesses?.map((guess, i) => (
-                        <li key={i} className="guess">{guess.guess}</li>
-                    ))}
-                </ol>
-            </div>
             {gameData[`round${gameData.currentRound}`] &&
                 <>
                 <Guesses guesses={gameData[`round${gameData.currentRound}`].guesses} currentGuess={newGuess} currentRowClassName={''} />
