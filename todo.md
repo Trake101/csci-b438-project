@@ -28,5 +28,12 @@
   - [x] Guesses component
   - [x] Keyboard component
   - [ ] Scoreboard component
+  - [ ] Alerts component
+  - [ ] Game rules component
   - [x] Limit guessing to current player
   - [x] Validate guesses against word list
+
+### Hosting
+
+- [x] Set up web server to host server application
+- [ ] Set up web server to host client application
