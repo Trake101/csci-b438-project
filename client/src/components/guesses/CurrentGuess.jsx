@@ -1,4 +1,5 @@
 import { Cell } from './Cell';
+import { Points } from './Points';
 
 export const CurrentGuess = ({ guess, className }) => {
   guess = guess.split('');
@@ -7,12 +8,14 @@ export const CurrentGuess = ({ guess, className }) => {
 
   return (
     <div className={classes}>
+      <Points points={' '} />
       {guess.map((letter, i) => (
         <Cell key={i} value={letter.toUpperCase()} />
       ))}
       {emptyCells.map((_, i) => (
         <Cell key={i} />
       ))}
+      <Points points={' '} />
     </div>
   );
 }
