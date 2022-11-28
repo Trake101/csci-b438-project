@@ -237,6 +237,8 @@ function returnDataPromise(gameData) {
     const round3 = JSON.parse(gameData.round3);
 
     const returnData = {
+      player1: gameData.player1,
+      player2: gameData.player2,
       currentRound: gameData.currentRound,
       currentPlayer: gameData[gameData.currentPlayer],
       player1Score: gameData.player1Score,
